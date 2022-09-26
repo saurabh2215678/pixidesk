@@ -22,12 +22,12 @@ const Main = ({child}) => {
     return(
         <>
             <div className="layout">
-                <Router>
                     <SideBar/>
                     <Header/>
                     <div className='main'>
                         {child}
                         <Routes>
+                            <Route index element={<Dashboard/>} />
                             <Route exact path="/projects" element={<Projects/>}/>
                             <Route exact path="/common_info" element={<CommonInfo/>}/>
                             <Route exact path="/cms" element={<CmsPages/>}/>
@@ -35,7 +35,7 @@ const Main = ({child}) => {
                             <Route path="*" element={<NotFound/>}/>
                         </Routes>
                     </div>
-                </Router>
+                
             </div>
         </>
     );
