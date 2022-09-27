@@ -1,21 +1,28 @@
-import React,{useEffect, useState} from "react";
+import React, { useEffect } from "react";
 import { ReactSVG } from 'react-svg';
 import logo from '../../assets/svg/logo.svg';
 import toggleIcon from '../../assets/svg/sidebar_toggle_icon.svg';
 import { Scrollbars } from 'react-custom-scrollbars-2';
 import Menus from "./menus";
-import {closeSidebar, openSidebar, toggleSidebar} from "../../Redux/actions/sidebarActions";
-
-import { useSelector, useDispatch } from 'react-redux'
+// redux import
+import {useSelector, useDispatch} from "react-redux";
+import {bindActionCreators} from "redux";
+import {actionCreators} from "../../state/index";
+import {Link} from "react-router-dom";
 
 const SideBar = () => {
-    const counter = useSelector((state) => state.sidebarOpened);
-
+    // redux functions implimentation
+    const sidebarOpened = useSelector((state) => state.sidebarOpened);
     const dispatch = useDispatch();
-
+    const {toggleSidebar} = bindActionCreators(actionCreators, dispatch);
     useEffect(()=>{
-        console.log(counter);
-    },[]);
+        if(sidebarOpened){
+            document.body.classList.add('sidebar_opened');
+        }else{
+            document.body.classList.remove('sidebar_opened');
+        }
+    },[sidebarOpened]);
+
 
     const handleUpdate = (value)=>{
         var element = document.getElementsByClassName('sidebar')[0];
@@ -28,14 +35,14 @@ const SideBar = () => {
 
 
     return(
-        <aside className={`sidebar`}>
+        <aside className={`sidebar ${sidebarOpened ? "opened" : "collapsed"}`}>
             <div className="sidenav_header">
-                <div className="logo">
+                <Link className="logo" to="/admin">
                     <ReactSVG className="logo_icon" src={logo} />
                     <h1 className="logo_text para-lg2">PIXIDESK</h1>
-                </div>
+                </Link>
                 
-                <ReactSVG onClick={()=>dispatch(openSidebar)} className="toggle_icon" src={toggleIcon} />
+                <ReactSVG onClick={()=>toggleSidebar()} className="toggle_icon" src={toggleIcon} />
             </div>
             <Scrollbars
             onUpdate={handleUpdate}
