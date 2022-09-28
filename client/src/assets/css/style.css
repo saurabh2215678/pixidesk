@@ -238,16 +238,17 @@ body:not(.sidebar_opened){--sidebar-width: 4.375rem;}
 /* splash end */
 
 /* avtar */
-.avtar_image { background-color: var(--theme-color); display: none;}
+.avtar_image { background-color: var(--theme-color);}
 .avtar_icon+label { position: absolute; }
 .avtar_box>button { background-color: var(--white); }
-.avtar_icon { width: 5rem; height: 5rem; cursor: pointer; background-color: var(--theme-color200); overflow: hidden; padding: 0.6rem; padding-bottom: 0; display: flex; align-items: flex-end; justify-content: center; border-radius: 50%; }
 .avtar_icon+label { position: absolute; }
 .avtar_box>button { background-color: var(--white); border-radius: 50%;}
 .avtar_icon>div { width: 100%; }
-.avtar_box { position: relative; width: fit-content; display: inline-block; }
+.avtar_box {--avtar-image-ratio: 5rem; position: relative; width: fit-content; display: inline-block; }
 .camera-icon { --aspect-ratio: 2.2rem; position: absolute; bottom: 0; right: -0.813rem; background-color: var(--theme-color); border-radius: 50%; width: var(--aspect-ratio); height: var(--aspect-ratio); }
 .camera-icon label{color: var(--white);}
 .camera-icon svg { width: 100%; height: 100%; }
 .avtar_icon svg { fill: var(--black700); }
+.avtar_icon { width: var(--avtar-image-ratio); height: var(--avtar-image-ratio); cursor: pointer; background-color: var(--theme-color200); overflow: hidden; padding: 0.6rem; padding-bottom: 0; display: flex; align-items: flex-end; justify-content: center; border-radius: 50%; }
+.avtar_image { width: var(--avtar-image-ratio); height: var(--avtar-image-ratio); background-color: var(--theme-color100); border-radius: 50%; border: 1px solid var(--black100); }
 /* avtar end */
