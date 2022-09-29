@@ -1,34 +1,30 @@
-import React from "react";
+import React,{useState} from "react";
 import { ReactSVG } from 'react-svg';
 import logo from '../../assets/svg/logo.svg';
 import background from '../../assets/images/admin-splash.jpg';
-import AccountCircle from '@mui/icons-material/AccountCircle';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Input from '@mui/material/Input';
-import InputAdornment from '@mui/material/InputAdornment';
-import IconButton from '@mui/material/IconButton';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import Button from '@mui/material/Button';
-import { Link } from "react-router-dom";
+import {VisibilityOff, Visibility, Email} from '@mui/icons-material';
+import {FormControl, InputLabel, Input, InputAdornment, IconButton, Button } from '@mui/material';
+
+import { Link, useNavigate } from "react-router-dom";
+import {useForm} from "react-hook-form";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Login = () => {
-
-    const [values, setValues] = React.useState({
-        email: '',
-        password: '',
-        showPassword: false,
-    });
-
-    const handleChange = (prop) => (event) => {
-        setValues({ ...values, [prop]: event.target.value });
+    const { login } = useAuth();
+    const { register, handleSubmit, formState: { errors } } = useForm();
+    const navigate = useNavigate();
+    const onSubmit = async (data) =>{
+        try{
+            await login(data.email, data.password)
+            navigate('/admin');
+        }catch{
+            console.log("failed to Login");
+        }
     };
+    const [showPassword, setShowPassword] = useState(false);
+
     const handleClickShowPassword = () => {
-        setValues({
-            ...values,
-            showPassword: !values.showPassword,
-        });
+        setShowPassword(!showPassword);
     };
 
     const handleMouseDownPassword = (event) => {
@@ -42,27 +38,27 @@ const Login = () => {
                     <ReactSVG className="logo_icon" src={logo} />
                     <h1 className="logo_text para-lg2">PIXIDESK</h1>
                 </div>
-                <div className="_card text-center">
+                <form onSubmit={handleSubmit(onSubmit)} className="_card text-center">
                     <h3 className="heading5">Welcome back</h3>
                     <p className="para-md3">Don't have an account? <Link to="/admin/signup" className="text-theme">Sign Up Free</Link></p>
                     <FormControl fullWidth variant="standard">
                         <InputLabel htmlFor="standard-adornment-password">Email</InputLabel>
                         <Input
-                            type="email"
+                            type="text"
                             endAdornment={
                             <InputAdornment position="end">
-                                <AccountCircle />
+                                <Email />
                             </InputAdornment>
                             }
+                            {...register("email", {required: true, pattern:/[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+/})}
                         />
                     </FormControl>
-
+                    {errors.email?.type === "required" && <p className="err">Email is Required</p>}
+                    {errors.email?.type === "pattern" && <p className="err">Enter valid Email id</p>}
                     <FormControl sx={{ mt: 2 }} fullWidth variant="standard">
                         <InputLabel htmlFor="standard-adornment-password">Password</InputLabel>
                         <Input
-                            type={values.showPassword ? 'text' : 'password'}
-                            value={values.password}
-                            onChange={handleChange('password')}
+                            type={showPassword ? 'text' : 'password'}
                             endAdornment={
                                 <InputAdornment position="end">
                                     <IconButton
@@ -71,14 +67,17 @@ const Login = () => {
                                         onMouseDown={handleMouseDownPassword}
                                         edge="end"
                                         >
-                                        {values.showPassword ? <VisibilityOff /> : <Visibility />}
+                                        {showPassword ? <VisibilityOff /> : <Visibility />}
                                     </IconButton>
                                 </InputAdornment>
                             }
+                            {...register("password", {required: true, minLength:8})}
                         />
                     </FormControl>
-                    <Button variant="contained" className="text-white" sx={{ mt: 3 }} fullWidth>Login</Button>
-                </div>
+                    {errors.password?.type === "required" && <p className="err">Password is Required</p>}
+                    {errors.password?.type === "minLength" && <p className="err">Minimum 8 chacters required</p>}
+                    <Button variant="contained" type="submit" className="text-white" sx={{ mt: 3 }} fullWidth>Login</Button>
+                </form>
             </div>
         </div>
     )

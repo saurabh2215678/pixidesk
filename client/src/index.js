@@ -5,6 +5,7 @@ import App from './pages/App';
 import {Provider} from "react-redux";
 import {store} from "./state/store";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { AuthProvider } from './contexts/AuthContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -28,7 +29,9 @@ root.render(
   <React.StrictMode>
     <Provider store={store}>
       <ThemeProvider theme={theme}>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </ThemeProvider>  
     </Provider>
   </React.StrictMode>

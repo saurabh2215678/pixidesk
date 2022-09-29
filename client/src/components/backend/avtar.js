@@ -1,16 +1,18 @@
 import React, {useState,  useEffect, useRef} from "react";
 import { ReactSVG } from 'react-svg';
-import { IconButton, ButtonBase, Slide, Dialog } from '@mui/material';
+import { IconButton, ButtonBase, Slide, Dialog, Button } from '@mui/material';
 import { PhotoCamera } from '@mui/icons-material';
 import userIcon from '../../assets/svg/user-solid.svg';
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
+import Fancybox from "../fancybox";
+import "@fancyapps/ui/dist/fancybox.css";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
   });
 
-const Avtar = () => {
+const Avtar = ({onChange}) => {
 
     const [selectedProfilePic, setSelectedProfilePic] = useState();
     const [preview, setPreview] = useState();
@@ -25,6 +27,7 @@ const Avtar = () => {
         cropper.getCroppedCanvas().toBlob((blob)=>{
             const objectUrl = URL.createObjectURL(blob)
             setCropData(objectUrl);
+            onChange(objectUrl);
             handleProfilePicModelClose();
         });
         }
@@ -76,7 +79,11 @@ const Avtar = () => {
         <div className="avtar_box">
             <ButtonBase>
                 {cropData !== '' ?
-                <img alt="profile" className="avtar_image" src={cropData}/>
+                <Fancybox>
+                    <a href={cropData} data-fancybox>
+                        <img alt="profile" className="avtar_image" src={cropData}/>
+                    </a>
+                </Fancybox>
                 :
                 <label className="avtar_icon">
                     <ReactSVG src={userIcon} />
@@ -99,12 +106,12 @@ const Avtar = () => {
             aria-describedby="alert-dialog-slide-description"
         >
         <div className="image_cropper" style={{minWidth: 500, minHeight: 500}}>
-            <div id="image-helper"></div>
             <Cropper
                 style={{ height: 400, width: "100%" }}
                 zoomTo={0}
                 initialAspectRatio={1}
-                preview=".img-preview"
+                aspectRatio={1}
+                className="crop_box"
                 src={preview}
                 viewMode={1}
                 minCropBoxHeight={10}
@@ -118,7 +125,11 @@ const Avtar = () => {
                 }}
                 guides={true}
                 />
-            <button onClick={getCropData}>crop</button>
+                <div className="d-flex p-4">
+                    <Button variant="contained" className="text-white"  onClick={getCropData} disableElevation fullWidth>Crop</Button>
+                    <span className="px-2"></span>
+                    <Button variant="contained" className="text-white"  onClick={handleProfilePicModelClose} color="error" disableElevation fullWidth>Cancel</Button>
+                </div>
         </div>
         </Dialog>
         </>
