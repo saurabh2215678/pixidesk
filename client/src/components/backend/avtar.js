@@ -24,7 +24,7 @@ const Avtar = ({onChange}) => {
 
     const getCropData = () => {
         if (typeof cropper !== "undefined") {
-        cropper.getCroppedCanvas().toBlob((blob)=>{
+        cropper.getCroppedCanvas({fillColor:"#fff"}).toBlob((blob)=>{
             const objectUrl = URL.createObjectURL(blob)
             setCropData(objectUrl);
             onChange(objectUrl);
@@ -116,7 +116,7 @@ const Avtar = ({onChange}) => {
                 viewMode={1}
                 minCropBoxHeight={10}
                 minCropBoxWidth={10}
-                background={false}
+                background={true}
                 responsive={true}
                 autoCropArea={1}
                 checkOrientation={false} // https://github.com/fengyuanchen/cropperjs/issues/671

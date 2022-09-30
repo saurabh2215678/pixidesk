@@ -1,10 +1,10 @@
-import React,{useRef, useState} from "react";
+import React,{useRef, useState, useEffect} from "react";
 import { ReactSVG } from 'react-svg';
 import logo from '../../assets/svg/logo.svg';
 import background from '../../assets/images/admin-splash.jpg';
 import {VisibilityOff, Visibility, AccountCircle, Email, Call} from '@mui/icons-material';
 import {FormControl, InputLabel, Input, InputAdornment, IconButton, Button } from '@mui/material';
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Navigate} from "react-router-dom";
 import Avtar from "../../components/backend/avtar";
 import {useForm} from "react-hook-form";
 import { useAuth } from "../../contexts/AuthContext";
@@ -12,23 +12,41 @@ import { useAuth } from "../../contexts/AuthContext";
 
 const SignUp = () => {
 
-    const { signup } = useAuth();
+    const { signup, currentUser } = useAuth();
     const navigate = useNavigate();
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
-    const onSubmit = async (data) =>{
-        try{
-            await signup(data.email, data.password);
-            navigate('/admin');
-        }catch{
-            console.log("failed to create account");
-        }
-    };
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const password = useRef({});
     const confirmPassword = useRef({});
     password.current = watch("password", "");
     confirmPassword.current = watch("confirm_password", "");
+    
+    const [firebaseEmailError, setFirebaseEmailError] = useState();
+    const [formError, setformError] = useState();
+
+    const onSubmit = async (data) =>{
+        try{
+            await signup(data.email, data.password);
+            navigate('/admin');
+        }catch(e){
+            if(e.code === "auth/email-already-in-use"){
+                setFirebaseEmailError("Email already exists.");
+            }else{
+                setformError(e.code);
+                console.log(e);
+            }
+        }
+    };
+
+    useEffect(() => {
+        const subscription = watch((value, { name, type }) => {
+            if(type === "change" && name === "email"){
+                setFirebaseEmailError(undefined);
+            }
+        });
+        return () => subscription.unsubscribe();
+      }, [watch]);
 
     const handleClickShowPassword = () => {
         setShowPassword(!showPassword);
@@ -44,7 +62,9 @@ const SignUp = () => {
     const handleProfilePic = (pictureblob) =>{
         console.log(pictureblob);
     }
-
+    if (currentUser) {
+        return <Navigate to="/admin" replace />;
+      }
     return(
         <div className="splash-page login-page" style={{backgroundImage: `url(${background})`}}>
             <div className="center">
@@ -99,6 +119,7 @@ const SignUp = () => {
                     </FormControl>
                     {errors.email?.type === "required" && <p className="err">Email is Required</p>}
                     {errors.email?.type === "pattern" && <p className="err">Enter valid Email id</p>}
+                    {firebaseEmailError && <p className="err">{firebaseEmailError}</p>}
                     <FormControl sx={{ mt: 1 }} fullWidth variant="standard">
                         <InputLabel htmlFor="standard-adornment-password">Password</InputLabel>
                         <Input
@@ -143,6 +164,7 @@ const SignUp = () => {
                     {errors.confirm_password?.type === "required" && <p className="err">Confirm password is Required</p>}
                     {errors.confirm_password?.type === "validate" && <p className="err">Password not matched</p>}
                     <Button variant="contained" type="submit" className="text-white" sx={{ mt: 3 }} fullWidth>SignUp</Button>
+                    {formError && <p className="err">{formError}</p>}
                 </form>
             </div>
         </div>
