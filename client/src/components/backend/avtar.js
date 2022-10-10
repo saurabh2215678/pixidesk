@@ -21,6 +21,7 @@ const Avtar = ({onChange}) => {
     const [cropData, setCropData] = useState("");
     const [cropper, setCropper] = useState();
     const imageInputRef = useRef();
+    const imageInputRef1 = useRef();
 
     const getCropData = () => {
         if (typeof cropper !== "undefined") {
@@ -40,6 +41,7 @@ const Avtar = ({onChange}) => {
   
     const handleProfilePicModelClose = () => {
         imageInputRef.current.value="";
+        imageInputRef1.current.value="";
         setProfilePicModelOpen(false);
     };
 
@@ -87,7 +89,7 @@ const Avtar = ({onChange}) => {
                 :
                 <label className="avtar_icon">
                     <ReactSVG src={userIcon} />
-                    <input hidden onChange={onSelectFile} accept="image/jpeg, image/png" type="file" />
+                    <input ref={imageInputRef1} hidden onChange={onSelectFile} accept="image/jpeg, image/png" type="file" />
                 </label>
                 }
             </ButtonBase>

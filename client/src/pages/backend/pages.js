@@ -1,8 +1,11 @@
 import React from "react";
+import ContentBox from "../../components/backend/contentBox";
 
 const Pages = () => {
     return (
-        <h2>Pages</h2>
+        <ContentBox>
+            <h2>Pages</h2>
+        </ContentBox>
     );
 }
 export default Pages;

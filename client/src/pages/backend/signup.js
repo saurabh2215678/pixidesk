@@ -8,15 +8,22 @@ import { Link, useNavigate, Navigate} from "react-router-dom";
 import Avtar from "../../components/backend/avtar";
 import {useForm} from "react-hook-form";
 import { useAuth } from "../../contexts/AuthContext";
+import CountryCodeSelector from "../../components/backend/countryCodeSelector";
+import {useDispatch} from "react-redux";
+import {bindActionCreators} from "redux";
+import {actionCreators} from "../../state/index";
 
 
 const SignUp = () => {
 
-    const { signup, currentUser } = useAuth();
+    const { signup, currentUser, signInWithFacebook } = useAuth();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const {signedUp} = bindActionCreators(actionCreators, dispatch);
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [contryCode, setcontryCode] = useState();
     const password = useRef({});
     const confirmPassword = useRef({});
     password.current = watch("password", "");
@@ -24,12 +31,14 @@ const SignUp = () => {
     
     const [firebaseEmailError, setFirebaseEmailError] = useState();
     const [formError, setformError] = useState();
+    const [profilePicBlob, setprofilePicBlob] = useState();
 
     const onSubmit = async (data) =>{
         try{
-            await signup(data.email, data.password);
+            await signup({...data, profile_picture:profilePicBlob, country_code:contryCode });
             navigate('/admin');
         }catch(e){
+            signedUp();
             if(e.code === "auth/email-already-in-use"){
                 setFirebaseEmailError("Email already exists.");
             }else{
@@ -38,6 +47,10 @@ const SignUp = () => {
             }
         }
     };
+
+    // useEffect(()=>{
+    //     console.log(isSigningUp);
+    // },[isSigningUp]);
 
     useEffect(() => {
         const subscription = watch((value, { name, type }) => {
@@ -60,8 +73,19 @@ const SignUp = () => {
     };
 
     const handleProfilePic = (pictureblob) =>{
-        console.log(pictureblob);
+        setprofilePicBlob(pictureblob);
     }
+
+    const handlePhoneFocus = (e) => {
+        var inputCountryWidth = e.target.closest(".input_phone").firstChild.clientWidth;
+        e.target.closest(".input_phone").style.setProperty('--input_dial_code_width', `${inputCountryWidth}px`);
+    }
+    const handleCountryCodeChange = ({element, country}) => {
+        var inputCountryWidth = element?.clientWidth;
+        element?.closest(".input_phone").style.setProperty('--input_dial_code_width', `${inputCountryWidth}px`);
+        setcontryCode(country?.dial_code);
+    }
+
     if (currentUser) {
         return <Navigate to="/admin" replace />;
       }
@@ -91,20 +115,25 @@ const SignUp = () => {
                         />
                     </FormControl>
                     {errors.name?.type === "required" && <p className="err">Name is Required</p>}
-                    <FormControl sx={{ mt: 1 }} fullWidth variant="standard">
-                        <InputLabel>Phone</InputLabel>
-                        <Input
-                            type="tel"
-                            endAdornment={
-                            <InputAdornment position="end">
-                                <Call />
-                            </InputAdornment>
-                            }
-                        {...register("phone", {required: true, pattern:/^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/})}
-                        />
-                    </FormControl>
+                    <div className="input_phone">
+                        <CountryCodeSelector onChange={handleCountryCodeChange} />
+                        <FormControl sx={{ mt: 1 }} fullWidth variant="standard">
+                            <InputLabel>Phone</InputLabel>
+                            <Input
+                                type="tel"
+                                onFocus={handlePhoneFocus}
+                                endAdornment={
+                                <InputAdornment position="end">
+                                    <Call />
+                                </InputAdornment>
+                                }
+                            {...register("phone", {required: true, pattern:/^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/})}
+                            />
+                        </FormControl>
+                    </div>
                     {errors.phone?.type === "required" && <p className="err">Phone is Required</p>}
                     {errors.phone?.type === "pattern" && <p className="err">Enter valid Phone number</p>}
+                    
                     <FormControl sx={{ mt: 1 }} fullWidth variant="standard">
                         <InputLabel>Email</InputLabel>
                         <Input
@@ -165,6 +194,7 @@ const SignUp = () => {
                     {errors.confirm_password?.type === "validate" && <p className="err">Password not matched</p>}
                     <Button variant="contained" type="submit" className="text-white" sx={{ mt: 3 }} fullWidth>SignUp</Button>
                     {formError && <p className="err">{formError}</p>}
+                    <span onClick={()=>signInWithFacebook()}>Sign up</span>
                 </form>
             </div>
         </div>

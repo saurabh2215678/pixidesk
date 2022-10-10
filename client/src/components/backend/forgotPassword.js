@@ -3,6 +3,7 @@ import {useForm} from "react-hook-form";
 import {FormControl, InputLabel, Input, InputAdornment, Button } from '@mui/material';
 import {Email} from '@mui/icons-material';
 import { useAuth } from "../../contexts/AuthContext";
+import LoadingButton from '@mui/lab/LoadingButton';
 
 const ForgotPassword = ({onCloseClick}) => {
     const { resetPassword } = useAuth();
@@ -10,12 +11,16 @@ const ForgotPassword = ({onCloseClick}) => {
     const [firebaseEmailError, setFirebaseEmailError] = useState();
     const [formError, setformError] = useState();
     const [isMailSent, setisMailSent] = useState(false);
+    const [loading, setloading] = useState(false);
     const formRef = useRef();
     const onSubmit = async (data) => {
+        setloading(true);
         try{
             await resetPassword(data.email)
             setisMailSent(true);
+            setloading(false);
         }catch(e){
+            setloading(false);
             if(e.code === "auth/user-not-found"){
                 setFirebaseEmailError("Email not found.");
             }
@@ -55,7 +60,9 @@ const ForgotPassword = ({onCloseClick}) => {
             {errors.email?.type === "required" && <p className="err">Email is Required</p>}
             {errors.email?.type === "pattern" && <p className="err">Enter valid Email id</p>}
             {firebaseEmailError && <p className="err">{firebaseEmailError}</p>}
-            {!isMailSent ?
+            {loading? 
+            <LoadingButton loading variant="contained" sx={{ mt: 2 }} fullWidth>Send Reset Link</LoadingButton>:
+            !isMailSent ?
             <Button variant="contained" type="submit" className="text-white" sx={{ mt: 2 }} fullWidth>Send Reset Link</Button>
             :
             <Button component="div" onClick={handleClose} variant="contained" className="text-white" sx={{ mt: 2 }} fullWidth>Close</Button>

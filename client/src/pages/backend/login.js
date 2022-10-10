@@ -5,10 +5,11 @@ import background from '../../assets/images/admin-splash.jpg';
 import {VisibilityOff, Visibility, Email} from '@mui/icons-material';
 import {FormControl, InputLabel, Input, InputAdornment, IconButton, Slide, Dialog, Button } from '@mui/material';
 
-import { Link, useNavigate, Navigate} from "react-router-dom";
+import { Link, useNavigate, Navigate, useLocation} from "react-router-dom";
 import {useForm} from "react-hook-form";
 import { useAuth } from "../../contexts/AuthContext";
 import ForgotPassword from "../../components/backend/forgotPassword";
+import LoadingButton from '@mui/lab/LoadingButton';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -22,12 +23,17 @@ const Login = () => {
     const [formError, setformError] = useState();
     const [openForgotPasswordModal, setOpenForgotPasswordModal] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
     const [showPassword, setShowPassword] = useState(false);
+    const [formSubmitLoading, setFormSubmitLoading] = useState(false);
+    const from = location.state?.from || "/admin";
     const onSubmit = async (data) =>{
+        setFormSubmitLoading(true);
         try{
             await login(data.email, data.password)
-            navigate("/admin");
+            navigate(from, { replace: true });
         }catch(e){
+            setFormSubmitLoading(false);
             if(e.code === "auth/wrong-password"){
                 setFirebasePasswordError('Wrong Password.');
             }
@@ -70,7 +76,7 @@ const Login = () => {
     };
 
     if (currentUser) {
-        return <Navigate to="/admin" replace />;
+        return <Navigate to={from} replace />;
       }
 
     return(
@@ -122,7 +128,10 @@ const Login = () => {
                     {errors.password?.type === "minLength" && <p className="err">Minimum 8 chacters required</p>}
                     {firebasePasswordError && <p className="err">{firebasePasswordError}</p>}
                     <Button variant="text" onClick={handleOpenForgotPasswordModal} sx={{ my: 2 }}>Forgot Password?</Button>
+                    {formSubmitLoading?
+                    <LoadingButton loading variant="contained" fullWidth>Login</LoadingButton>:
                     <Button variant="contained" type="submit" className="text-white"  fullWidth>Login</Button>
+                    }
                     {formError && <p className="err">{formError}</p>}
                 </form>
             </div>

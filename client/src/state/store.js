@@ -3,5 +3,6 @@ import reducres from "./reducers/index";
 
 export const store = configureStore({
         reducer: reducres,
-        state: {}
+        state: {},
+        middleware: (getDefaultMiddleware) => getDefaultMiddleware({ serializableCheck: false }),
 });

@@ -1,8 +1,12 @@
 import {combineReducers} from "redux";
-import accountReducer from "./accountReducer";
 import sidebarReducer from "./sidebarReducer";
+import userReducer from "./userReducer";
+import signingUpReducer from "./isSigningUp";
+import profileStatus from "./profileReducer";
 const reducres = combineReducers({
-    account: accountReducer,
-    sidebarOpened: sidebarReducer
+    sidebarOpened: sidebarReducer,
+    user: userReducer,
+    isSigningUp: signingUpReducer,
+    profileStatus: profileStatus
 });
 export default reducres;
