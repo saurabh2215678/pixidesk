@@ -16,7 +16,7 @@ import {actionCreators} from "../../state/index";
 
 const SignUp = () => {
 
-    const { signup, currentUser, signInWithFacebook } = useAuth();
+    const { signup, currentUser, signInWithFacebook, signUpWithGoogle } = useAuth();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const {signedUp} = bindActionCreators(actionCreators, dispatch);
@@ -194,7 +194,8 @@ const SignUp = () => {
                     {errors.confirm_password?.type === "validate" && <p className="err">Password not matched</p>}
                     <Button variant="contained" type="submit" className="text-white" sx={{ mt: 3 }} fullWidth>SignUp</Button>
                     {formError && <p className="err">{formError}</p>}
-                    <span onClick={()=>signInWithFacebook()}>Sign up</span>
+                    <span onClick={()=>signInWithFacebook()}>Sign up with facebook</span>
+                    <span onClick={()=>signUpWithGoogle()}>Sign up with Google</span>
                 </form>
             </div>
         </div>

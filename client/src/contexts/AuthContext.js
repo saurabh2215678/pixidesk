@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import {auth, db, storage} from '../firebase';
 import {doc, collection, setDoc, getDocs, Timestamp} from 'firebase/firestore';
 import {ref, uploadBytesResumable, getDownloadURL} from 'firebase/storage';
-import {signInWithPopup, FacebookAuthProvider} from 'firebase/auth';
+import {signInWithPopup, FacebookAuthProvider, GoogleAuthProvider} from 'firebase/auth';
 
 import {useDispatch} from "react-redux";
 import {bindActionCreators} from "redux";
@@ -99,12 +99,6 @@ export const AuthProvider = ({ children }) => {
                   });
                 }
               );
-                // var uploadTask = await uploadBytes(imageRef, file, metadata);
-                // const downloadUrl = await getDownloadURL(imageRef);
-                // const userDocRef = doc(db, 'users', authenticatedUser.user.uid);
-                // const payload = {...dbUser, "profile_picture" : downloadUrl};
-                // await setDoc(userDocRef, payload);
-                // signedUp();
             }catch(e){
                 signedUp();
                 console.log(e);
@@ -132,11 +126,89 @@ export const AuthProvider = ({ children }) => {
 
         const credential = FacebookAuthProvider.credentialFromResult(authenticatedUser);
         const accessToken = credential.accessToken;
-        // const userProfilePic = await authenticatedUser.getPhotoUrl() + `?access_token=${accessToken}`;
-        console.log(authenticatedUser);
-        console.log(authenticatedUser.getUserProfilePicture());
+        const photoUrl = `${authenticatedUser.user.providerData[0].photoURL}?type=large&width=720&height=720&access_token=${accessToken}`
+        let blob = await fetch(photoUrl).then(r => r.blob());
+        const objectUrl = URL.createObjectURL(blob);
 
-        return authenticatedUser;
+        const dbUser = {
+          "id": currentUserId,
+          "email" : authenticatedUser.user.email,
+          "name" : authenticatedUser.user.displayName,
+          "uid" : authenticatedUser.user.uid,
+          "created_at" : Timestamp.fromDate (new Date()),
+          "updated_at" : Timestamp.fromDate (new Date()),
+          "user_type" : 2,
+          "is_approved" : false
+        }
+
+        const file = await fetch(objectUrl).then(r => r.blob()).then(blobFile => new File([blobFile], 'profile_picture', { type: blobFile.type }));
+        const imageRef = ref(storage, `users/user_${currentUserId}/${file.name}.jpeg`);
+        const metadata = {
+            contentType: file.type,
+          };
+        try{
+          const uploadTask = uploadBytesResumable(imageRef, file, metadata);
+          uploadTask.on('state_changed', 
+          (snapshot) => {
+              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              uploadProfilePicture(progress);
+              updatingProfile('profile_picture');
+            console.log('Upload is ' + progress + '% done');
+            switch (snapshot.state) {
+              case 'paused':
+                console.log('Upload is paused');
+                break;
+              case 'running':
+                console.log('Upload is running');
+                break;
+              default:
+                  console.log('i am trying to upload');
+            }
+          }, 
+          (error) => {
+            // Handle unsuccessful uploads
+          }, 
+          () => {
+              updatingProfile('profile')
+            // Handle successful uploads on complete
+            // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+            getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+              console.log('File available at', downloadURL);
+              const userDocRef = doc(db, 'users', authenticatedUser.user.uid);
+              const payload = {...dbUser, "profile_picture" : downloadURL};
+              await setDoc(userDocRef, payload);
+              updatedProfile();
+              signedUp();
+            });
+          }
+        );
+      }catch(e){
+          signedUp();
+          console.log(e);
+      }
+      return authenticatedUser;
+    }
+
+    async function signUpWithGoogle(){
+      signingUp();
+      const provider = new GoogleAuthProvider();
+      const userCollectionRef = collection(db, 'users');
+      const data = await getDocs(userCollectionRef);
+      var allUsers = data.docs.map((doc)=>({...doc.data()}));
+      allUsers.sort(compare);
+      const last_user = allUsers[allUsers.length - 1];
+      const currentUserId = last_user?.id ? (last_user.id + 1) : 1;
+      const authenticatedUser = await signInWithPopup(auth, provider);
+
+      const credential = GoogleAuthProvider.credentialFromResult(authenticatedUser);
+      const accessToken = credential.accessToken;
+      const photoUrl = `${authenticatedUser.user.photoURL}`
+
+      console.log(authenticatedUser);
+      console.log(photoUrl.replace('96', '275'));
+      const file = await fetch(photoUrl.replace('96', '275')).then(r => r.blob()).then(blobFile => new File([blobFile], 'profile_picture', { type: blobFile.type }));
+      console.log(file);
+      return authenticatedUser;
     }
 
     async function login(email, password) {
@@ -205,6 +277,7 @@ export const AuthProvider = ({ children }) => {
     const value = {
         currentUser,
         signInWithFacebook,
+        signUpWithGoogle,
         login,
         logout,
         signup,
