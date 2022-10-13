@@ -12,6 +12,25 @@ import CountryCodeSelector from "../../components/backend/countryCodeSelector";
 import {useDispatch} from "react-redux";
 import {bindActionCreators} from "redux";
 import {actionCreators} from "../../state/index";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { styled } from '@mui/material/styles';
+
+const FacebookButton = styled(Button)(({ theme }) => ({
+    color: theme.palette.getContrastText('#0069d9'),
+    backgroundColor: '#0069d9',
+    '&:hover': {
+      backgroundColor: '#0069d9',
+    },
+  }));
+
+const GoogleButton = styled(Button)(({ theme }) => ({
+color: theme.palette.getContrastText('#DB4437'),
+backgroundColor: '#DB4437',
+'&:hover': {
+    backgroundColor: '#DB4437',
+},
+}));
 
 
 const SignUp = () => {
@@ -89,9 +108,20 @@ const SignUp = () => {
     if (currentUser) {
         return <Navigate to="/admin" replace />;
       }
+
+    const handleSignUpWithFacebook = async () => {
+        const signupwithfacebook = await signInWithFacebook();
+        if(signupwithfacebook == 'auth/account-exists-with-different-credential'){
+            toast.error("Already registered with this facebook account. try logging in");
+        }
+        // console.log(signupwithfacebook)
+    } 
     return(
         <div className="splash-page login-page" style={{backgroundImage: `url(${background})`}}>
             <div className="center">
+            <ToastContainer
+            position="bottom-center"
+            />
                 <div className="logo">
                     <ReactSVG className="logo_icon" src={logo} />
                     <h1 className="logo_text para-lg2">PIXIDESK</h1>
@@ -194,9 +224,14 @@ const SignUp = () => {
                     {errors.confirm_password?.type === "validate" && <p className="err">Password not matched</p>}
                     <Button variant="contained" type="submit" className="text-white" sx={{ mt: 3 }} fullWidth>SignUp</Button>
                     {formError && <p className="err">{formError}</p>}
-                    <span onClick={()=>signInWithFacebook()}>Sign up with facebook</span>
-                    <span onClick={()=>signUpWithGoogle()}>Sign up with Google</span>
                 </form>
+                <span className="or">or</span>
+                <div className="otherbuttons d-flex">
+                    
+                    <FacebookButton variant="contained" type="submit" onClick={handleSignUpWithFacebook} className="text-white" sx={{ mt: 3 }} fullWidth>Sign up with facebook</FacebookButton>
+                    <div className="p-2"></div>
+                    <GoogleButton variant="contained" type="submit"  onClick={()=>signUpWithGoogle()} className="text-white" sx={{ mt: 3 }} fullWidth>Sign up with Google</GoogleButton>
+                </div>
             </div>
         </div>
     );

@@ -112,9 +112,9 @@ export const AuthProvider = ({ children }) => {
         return authenticatedUser;
     }
 
-
     async function signInWithFacebook(){
         signingUp();
+        try{
         const provider = new FacebookAuthProvider();
         const userCollectionRef = collection(db, 'users');
         const data = await getDocs(userCollectionRef);
@@ -146,7 +146,7 @@ export const AuthProvider = ({ children }) => {
         const metadata = {
             contentType: file.type,
           };
-        try{
+        
           const uploadTask = uploadBytesResumable(imageRef, file, metadata);
           uploadTask.on('state_changed', 
           (snapshot) => {
@@ -182,11 +182,11 @@ export const AuthProvider = ({ children }) => {
             });
           }
         );
+        return authenticatedUser;
       }catch(e){
           signedUp();
-          console.log(e);
+          return e.code;
       }
-      return authenticatedUser;
     }
 
     async function signUpWithGoogle(){
@@ -202,12 +202,26 @@ export const AuthProvider = ({ children }) => {
 
       const credential = GoogleAuthProvider.credentialFromResult(authenticatedUser);
       const accessToken = credential.accessToken;
-      const photoUrl = `${authenticatedUser.user.photoURL}`
+      const photoUrl = `${authenticatedUser.user.photoURL}`.replace('96', '275');
 
+      const dbUser = {
+        "id": currentUserId,
+        "email" : authenticatedUser.user.email,
+        "name" : authenticatedUser.user.displayName,
+        "uid" : authenticatedUser.user.uid,
+        "created_at" : Timestamp.fromDate (new Date()),
+        "updated_at" : Timestamp.fromDate (new Date()),
+        "profile_picture" : photoUrl,
+        "user_type" : 2,
+        "is_approved" : false
+      }
+      
       console.log(authenticatedUser);
-      console.log(photoUrl.replace('96', '275'));
-      const file = await fetch(photoUrl.replace('96', '275')).then(r => r.blob()).then(blobFile => new File([blobFile], 'profile_picture', { type: blobFile.type }));
-      console.log(file);
+      console.log(photoUrl);
+      const userDocRef = doc(db, 'users', authenticatedUser.user.uid);
+      await setDoc(userDocRef, dbUser);
+      updatedProfile();
+      signedUp();
       return authenticatedUser;
     }
 
@@ -231,41 +245,7 @@ export const AuthProvider = ({ children }) => {
     function updatePassword(password) {
         return currentUser.updatePassword(password)
     }
-
-    // async function getCurrentUser (){
-
-    //     const userCollectionRef = collection(db, 'users');
-    //     const data = await getDocs(userCollectionRef);
-    //     var allUsers = data.docs.map((doc)=>({...doc.data()}));
-
-    //     console.log(allUsers);
-
-    //     // const userDocRef = doc(db, 'users', currentUser.uid);
-    //     // const data = await getDoc(userDocRef);
-    //     // console.log(data.data());
-    // }
-
-
-    // useEffect(()=>{
-    //     if(currentUser){
-    //         const user = new User();
-    //         user.id = 0;
-    //         user.email = currentUser.email;
-    //         user.name = "abcdef";
-    //         user.phone = "123456";
-    //         user.country_code = "+91";
-    //         user.profile_picture ="abcdef"
-    //         user.uid = currentUser.uid;
-    //         user.created_at = Timestamp.fromDate (new Date());
-    //         user.updated_at = Timestamp.fromDate (new Date());
-    //         user.user_type = 2;
-    //         user.is_approved = false;
-    //         createUser(user);
-    //         console.log(user);
-    //         getCurrentUser();
-    //     }
-    // },[currentUser])
-
+    
     useEffect(()=>{
         const unsubscribe = auth.onAuthStateChanged(user => {
             setCurrentUser(user);
