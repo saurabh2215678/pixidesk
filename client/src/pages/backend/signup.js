@@ -35,7 +35,7 @@ backgroundColor: '#DB4437',
 
 const SignUp = () => {
 
-    const { signup, currentUser, signInWithFacebook, signUpWithGoogle } = useAuth();
+    const { signup, currentUser, signInWithFacebook, signInWithGoogle } = useAuth();
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const {signedUp} = bindActionCreators(actionCreators, dispatch);
@@ -66,10 +66,6 @@ const SignUp = () => {
             }
         }
     };
-
-    // useEffect(()=>{
-    //     console.log(isSigningUp);
-    // },[isSigningUp]);
 
     useEffect(() => {
         const subscription = watch((value, { name, type }) => {
@@ -109,12 +105,12 @@ const SignUp = () => {
         return <Navigate to="/admin" replace />;
       }
 
-    const handleSignUpWithFacebook = async () => {
-        const signupwithfacebook = await signInWithFacebook();
-        if(signupwithfacebook == 'auth/account-exists-with-different-credential'){
-            toast.error("Already registered with this facebook account. try logging in");
+    const handleSignInWithFacebook = async () => {
+        const signinwithfacebook = await signInWithFacebook();
+        if(signinwithfacebook == 'auth/account-exists-with-different-credential'){
+            toast.error("Already registered with this email. try logging in");
         }
-        // console.log(signupwithfacebook)
+        // console.log(signInwithfacebook)
     } 
     return(
         <div className="splash-page login-page" style={{backgroundImage: `url(${background})`}}>
@@ -228,9 +224,9 @@ const SignUp = () => {
                 <span className="or">or</span>
                 <div className="otherbuttons d-flex">
                     
-                    <FacebookButton variant="contained" type="submit" onClick={handleSignUpWithFacebook} className="text-white" sx={{ mt: 3 }} fullWidth>Sign up with facebook</FacebookButton>
+                    <FacebookButton variant="contained" type="submit" onClick={handleSignInWithFacebook} className="text-white" sx={{ mt: 3 }} fullWidth>Sign up with facebook</FacebookButton>
                     <div className="p-2"></div>
-                    <GoogleButton variant="contained" type="submit"  onClick={()=>signUpWithGoogle()} className="text-white" sx={{ mt: 3 }} fullWidth>Sign up with Google</GoogleButton>
+                    <GoogleButton variant="contained" type="submit"  onClick={signInWithGoogle} className="text-white" sx={{ mt: 3 }} fullWidth>Sign up with Google</GoogleButton>
                 </div>
             </div>
         </div>

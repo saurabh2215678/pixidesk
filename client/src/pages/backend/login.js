@@ -10,13 +10,31 @@ import {useForm} from "react-hook-form";
 import { useAuth } from "../../contexts/AuthContext";
 import ForgotPassword from "../../components/backend/forgotPassword";
 import LoadingButton from '@mui/lab/LoadingButton';
+import { styled } from '@mui/material/styles';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
   });
 
+
+const FacebookButton = styled(Button)(({ theme }) => ({
+    color: theme.palette.getContrastText('#0069d9'),
+    backgroundColor: '#0069d9',
+    '&:hover': {
+      backgroundColor: '#0069d9',
+    },
+  }));
+
+const GoogleButton = styled(Button)(({ theme }) => ({
+color: theme.palette.getContrastText('#DB4437'),
+backgroundColor: '#DB4437',
+'&:hover': {
+    backgroundColor: '#DB4437',
+},
+}));
+
 const Login = () => {
-    const { login, currentUser } = useAuth();
+    const { login, currentUser, signInWithFacebook, signInWithGoogle} = useAuth();
     const { register, watch, handleSubmit, formState: { errors } } = useForm();
     const [firebaseEmailError, setFirebaseEmailError] = useState();
     const [firebasePasswordError, setFirebasePasswordError] = useState();
@@ -134,6 +152,12 @@ const Login = () => {
                     }
                     {formError && <p className="err">{formError}</p>}
                 </form>
+                <span className="or">or</span>
+                <div className="otherbuttons d-flex">
+                    <FacebookButton variant="contained" type="submit" onClick={signInWithFacebook} className="text-white" sx={{ mt: 3 }} fullWidth>Login with facebook</FacebookButton>
+                    <div className="p-2"></div>
+                    <GoogleButton variant="contained" type="submit" onClick={signInWithGoogle} className="text-white" sx={{ mt: 3 }} fullWidth>Login with Google</GoogleButton>
+                </div>
             </div>
             <Dialog
                 open={openForgotPasswordModal}

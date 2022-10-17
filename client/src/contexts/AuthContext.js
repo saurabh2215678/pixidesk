@@ -123,7 +123,10 @@ export const AuthProvider = ({ children }) => {
         const last_user = allUsers[allUsers.length - 1];
         const currentUserId = last_user?.id ? (last_user.id + 1) : 1;
         const authenticatedUser = await signInWithPopup(auth, provider);
-
+        if(allUsers.find(user=>user.uid === authenticatedUser.user.uid)?.id > 0){
+          signedUp();
+          return authenticatedUser;
+        }
         const credential = FacebookAuthProvider.credentialFromResult(authenticatedUser);
         const accessToken = credential.accessToken;
         const photoUrl = `${authenticatedUser.user.providerData[0].photoURL}?type=large&width=720&height=720&access_token=${accessToken}`
@@ -189,7 +192,7 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    async function signUpWithGoogle(){
+    async function signInWithGoogle(){
       signingUp();
       const provider = new GoogleAuthProvider();
       const userCollectionRef = collection(db, 'users');
@@ -199,9 +202,6 @@ export const AuthProvider = ({ children }) => {
       const last_user = allUsers[allUsers.length - 1];
       const currentUserId = last_user?.id ? (last_user.id + 1) : 1;
       const authenticatedUser = await signInWithPopup(auth, provider);
-
-      const credential = GoogleAuthProvider.credentialFromResult(authenticatedUser);
-      const accessToken = credential.accessToken;
       const photoUrl = `${authenticatedUser.user.photoURL}`.replace('96', '275');
 
       const dbUser = {
@@ -216,9 +216,12 @@ export const AuthProvider = ({ children }) => {
         "is_approved" : false
       }
       
-      console.log(authenticatedUser);
-      console.log(photoUrl);
       const userDocRef = doc(db, 'users', authenticatedUser.user.uid);
+
+      if(allUsers.find(user=>user.uid === authenticatedUser.user.uid)?.id > 0){
+        signedUp();
+        return authenticatedUser;
+      }
       await setDoc(userDocRef, dbUser);
       updatedProfile();
       signedUp();
@@ -229,7 +232,7 @@ export const AuthProvider = ({ children }) => {
         const loggedInUser =  await auth.signInWithEmailAndPassword(email, password);
         return loggedInUser;
     }
-    
+
     function logout() {
         return auth.signOut()
     }
@@ -257,7 +260,7 @@ export const AuthProvider = ({ children }) => {
     const value = {
         currentUser,
         signInWithFacebook,
-        signUpWithGoogle,
+        signInWithGoogle,
         login,
         logout,
         signup,
