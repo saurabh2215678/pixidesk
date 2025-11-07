@@ -12,7 +12,7 @@ const Header = () => {
           <Image
             src="/logo.svg"
             alt="Logo - Saurabh Singh"
-            width={120}
+            width={260}
             height={60}
           />
         </a>

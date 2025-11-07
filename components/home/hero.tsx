@@ -89,16 +89,15 @@ const HeroSection = React.memo(({ modelOpened, setModelOpened }: ModelOpened) =>
         <Button
           classes="mr-3"
           type={ButtonTypes.OUTLINE}
-          name="Resume"
-          target="_blank"
+          name="Start a Project"
           rel="noreferrer"
-          href="/Saurabh_Resume.pdf"
+          href="tel:+919131048806"
         ></Button>
         <Button
           classes="ml-3"
           type={ButtonTypes.PRIMARY}
           name="Let's Talk"
-          onClick={()=>setModelOpened(true)}
+          href="mailto:singhcodesaurabh@gmail.com"
         ></Button>
       </div>
     </div>
@@ -114,7 +113,7 @@ const HeroSection = React.memo(({ modelOpened, setModelOpened }: ModelOpened) =>
       style={{ opacity: 0 }}
     >
       {renderHeroContent()}
-      <LetsTalkModal isOpened={modelOpened} setIsOpened={setModelOpened}/>
+      {/* <LetsTalkModal isOpened={modelOpened} setIsOpened={setModelOpened}/> */}
       {renderBackgroundImage()}
     </section>
   );

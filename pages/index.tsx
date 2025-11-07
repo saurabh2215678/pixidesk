@@ -1,3 +1,4 @@
+"use client";
 import { METADATA } from "../constants";
 import Head from "next/head";
 import React, { useEffect, useState } from "react";
@@ -20,7 +21,6 @@ import Scripts from "@/components/common/scripts";
 import AboutSection from "@/components/home/about";
 
 const DEBOUNCE_TIME = 100;
-
 export const isSmallScreen = (): boolean => document.body.clientWidth < 767;
 export const NO_MOTION_PREFERENCE_QUERY =
   "(prefers-reduced-motion: no-preference)";
